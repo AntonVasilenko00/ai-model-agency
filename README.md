@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Model Agency — Dataset Generator
 
-## Getting Started
+Generate consistent AI image datasets by uploading a source photo and 30 reference images. The app describes each reference with OpenAI Vision, then generates matching images of the source person via Nano Banana Pro.
 
-First, run the development server:
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local
+# Fill in your API keys in .env.local
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | Yes | OpenAI API key (needs vision-capable model access) |
+| `NANO_BANANA_PRO_API_KEY` | Yes | Nano Banana Pro API key |
+| `NANO_BANANA_PRO_BASE_URL` | No | Defaults to `https://gateway.bananapro.site` |
+
+## Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Workflow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Upload a **source photo** (the identity reference).
+2. Upload **30 dataset images** across three categories:
+   - **Face** (10) — close-up face shots
+   - **Face + Body** (10) — upper body with face
+   - **Full Body** (10) — full body shots
+3. Click **Generate Dataset**.
+4. The app describes each of the 30 images using OpenAI, then generates 30 images of the source person matching those descriptions.
+5. Download individual images or the full set as a ZIP.
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/
+    page.tsx                    # Main UI
+    api/
+      upload/route.ts           # Handle file uploads
+      jobs/route.ts             # Start generation pipeline
+      jobs/[id]/route.ts        # Poll job status
+      jobs/[id]/zip/route.ts    # Download all as ZIP
+      download/route.ts         # Download single image
+  lib/
+    types.ts                    # Shared types
+    storage.ts                  # File I/O helpers
+    openai.ts                   # OpenAI Vision descriptions
+    nano-banana-pro.ts          # Image generation + polling
+    job-store.ts                # In-memory job state
+    pipeline.ts                 # Orchestration logic
+data/                           # Runtime uploads & output (gitignored)
+```
