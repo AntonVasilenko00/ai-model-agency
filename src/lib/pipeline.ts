@@ -92,6 +92,7 @@ export async function runGenerationForAllImages(
   const job = await getJob(jobId);
   if (!job) throw new Error(`Job ${jobId} not found`);
   if (!job.sourceImagePath) throw new Error("Source image is required to generate images");
+  const sourceImagePath = job.sourceImagePath;
 
   const pendingImages = job.generatedImages.filter(
     (g) => (g.status === "pending" || g.status === "failed") && g.prompt
@@ -109,7 +110,7 @@ export async function runGenerationForAllImages(
         generateSingleImage(
           jobId,
           gen.label,
-          job.sourceImagePath,
+          sourceImagePath,
           gen.prompt!
         )
       )
